@@ -4,7 +4,8 @@ const url = require('url')
 const HDWalletProvider = require('truffle-hdwallet-provider')
 const Web3 = require('web3')
 const abi = require('./abi/token')
-const { connection } = require('./db')
+const { connection, insert, find } = require('./db')
+var client = null
 require('dotenv').config()
 
 const infura_apikey = process.env.INFURA_NODE_ID
@@ -71,43 +72,52 @@ app.get('/', (req, res) => {
   res.send(template())
 })
 
-app.get('/send', (req, res) => {
-  console.log(`ip address - `, req.headers['x-forwarded-for'] || req.connection.remoteAddress)
-  const url_parts = url.parse(req.url, true)
-  const query = url_parts.query
+app.get('/send', async (req, res) => {
 
-  const from = process.env.FROM
-  const to = query.address
-  const value = web3.utils.toWei('1', 'ether')
+  try {
 
-  //create token instance from abi and contract address
-  const tokenInstance = new web3.eth.Contract(abi, process.env.TOKEN_CONTRACT_ADDRESS)
+    let ipAddress = req.headers['x-forwarded-for'] || req.connection.remoteAddress
+    console.log(`ip address - `, ipAddress)
+    const url_parts = url.parse(req.url, true)
+    const query = url_parts.query
 
-  tokenInstance.methods.transfer(to, value).send({ from }, function (error, txHash) {
-    if (!error) {
-      console.log(txHash)
-      res.send(
-        template('', 'Great, test OCEANs are on the way!', txHash)
-      )
-    } else {
-      console.error(err)
-    }
-  })
+    const from = process.env.FROM
+    const to = query.address
+    const value = web3.utils.toWei(process.env.TOKEN_AMOUNT, 'ether')
 
+    //check if this user is in cool down period
+    await find({ $or: [{ "ip": ipAddress }, { "wallet": query.address }] }, shouldTransfer => {
+      if (shouldTransfer) {
+        res.send(
+          template('', "You have to wait 24 hours between faucet requests", undefined)
+        )
+      }
+    })
 
-  /*web3.eth
-      .sendTransaction({ from, to, value })
-      .then(tx => {
-          console.log(tx)
-          res.send(
-              template('', 'Great, coins are on the way!', tx.transactionHash)
-          )
-      })
-      .catch(err => res.send(template(err))) */
+    //insert ip address into db
+    await insert({ ip: ipAddress, wallet: to, lastUpdatedOn: Date.now() }, (result) => console.log(result))
+
+    //create token instance from abi and contract address
+    const tokenInstance = new web3.eth.Contract(abi, process.env.TOKEN_CONTRACT_ADDRESS)
+
+    tokenInstance.methods.transfer(to, value).send({ from }, function (error, txHash) {
+      if (!error) {
+        console.log(txHash)
+        res.send(
+          template('', 'Great, test OCEANs are on the way!', txHash)
+        )
+      } else {
+        console.error(err)
+      }
+    })
+
+  } catch (err) {
+    console.error(err)
+  }
 })
 
 const port = process.env.PORT || 4000
 app.listen(port, async () => {
-  await connection()
+  client = await connection()
   console.log('Listening on port - ', port)
 })

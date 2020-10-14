@@ -1,5 +1,6 @@
 const MongoClient = require('mongodb').MongoClient;
 require('dotenv').config()
+var client = null
 
 // Connection URL
 
@@ -9,7 +10,7 @@ console.log("URL - ", url)
 // Use connect method to connect to the server
 async function connection() {
     try {
-        let client = await MongoClient.connect(url, { useUnifiedTopology: true })
+        client = await MongoClient.connect(url, { useUnifiedTopology: true })
         console.log("Connected successfully to server");
         return client
     } catch (err) {
@@ -17,4 +18,32 @@ async function connection() {
     }
 }
 
-module.exports = { connection }
+async function insert(records, callback) {
+    // Get the documents collection
+    console.log("client - ", client)
+    let db = client.db(process.env.DB_NAME)
+    const collection = db.collection('records');
+    // Insert some documents
+    try {
+        await collection.insertOne(records, function (err, result) {
+            console.log("Inserted into database");
+            callback(result);
+        });
+    } catch (err) {
+        console.error(err)
+    }
+}
+
+async function find(query, callback) {
+    // Get the documents collection
+    let db = client.db(process.env.DB_NAME)
+    const collection = db.collection('records');
+    collection.find(query).toArray(function (err, docs) {
+        assert.equal(err, null);
+        console.log("Found the following records");
+        console.log(docs);
+        callback(docs);
+    });
+}
+
+module.exports = { connection, insert }

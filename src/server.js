@@ -74,7 +74,7 @@ app.get("/send", async (req, res) => {
                   success: true
                 });
               } else {
-                console.error(err);
+                console.error(error);
               }
             });
         }

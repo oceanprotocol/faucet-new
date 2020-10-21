@@ -131,3 +131,8 @@
 .error {
   color: "red";
 }
+
+.balance {
+  text-align: end;
+  margin-top: 10px;
+}

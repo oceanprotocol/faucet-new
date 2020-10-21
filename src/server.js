@@ -10,6 +10,7 @@ const { isAllowed } = require("./util");
 var client = null;
 require("dotenv").config();
 
+var tokenInstance = null;
 const infura_apikey = process.env.INFURA_NODE_ID;
 
 const provider = new HDWalletProvider(
@@ -21,9 +22,9 @@ const web3 = new Web3(provider);
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 
-app.get("/", (req, res) => {
-  //res.send(template());
-  res.render("index.ejs", { message: null, success: false });
+app.get("/", async (req, res) => {
+  let balance = await getBalance();
+  res.render("index.ejs", { message: null, success: false, balance });
 });
 
 app.get("/send", async (req, res) => {
@@ -46,9 +47,11 @@ app.get("/send", async (req, res) => {
       async records => {
         console.log(records[0]);
         if (records[0] && !isAllowed(records[0].lastUpdatedOn)) {
+          let balance = await getBalance();
           res.render("index.ejs", {
             message: "You have to wait 24 hours between faucet requests",
-            success: false
+            success: false,
+            balance
           });
         } else {
           //insert ip address into db
@@ -58,20 +61,19 @@ app.get("/send", async (req, res) => {
           );
 
           //create token instance from abi and contract address
-          const tokenInstance = new web3.eth.Contract(
-            abi,
-            process.env.TOKEN_CONTRACT_ADDRESS
-          );
+          const tokenInst = getTokenInstance();
 
-          tokenInstance.methods
+          tokenInst.methods
             .transfer(to, value)
-            .send({ from }, function(error, txHash) {
+            .send({ from }, async function(error, txHash) {
               if (!error) {
                 console.log("txHash - ", txHash);
+                let balance = await getBalance();
                 res.render("index.ejs", {
                   message: `Great!! test OCEANs are on the way - ${txHash}`,
                   link: `https://rinkeby.etherscan.io/tx/${txHash}`,
-                  success: true
+                  success: true,
+                  balance
                 });
               } else {
                 console.error(error);
@@ -84,6 +86,24 @@ app.get("/send", async (req, res) => {
     console.error(err);
   }
 });
+
+async function getBalance() {
+  let tokenInst = getTokenInstance();
+  let bal = await tokenInst.methods.balanceOf(process.env.FROM).call();
+  let balance = web3.utils.fromWei(bal, "ether");
+  return balance;
+}
+
+function getTokenInstance() {
+  if (!tokenInstance) {
+    //create token instance from abi and contract address
+    tokenInstance = new web3.eth.Contract(
+      abi,
+      process.env.TOKEN_CONTRACT_ADDRESS
+    );
+  }
+  return tokenInstance;
+}
 
 const port = process.env.PORT || 4000;
 

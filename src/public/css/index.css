@@ -136,3 +136,19 @@
   text-align: end;
   margin-top: 10px;
 }
+
+.btn-primary {
+  background-color: #ff4092;
+  border-color: #ff4092;
+}
+
+.btn-primary:hover {
+  background-color: #f0267e;
+  border-color: #f0267e;
+}
+
+.btn-primary:active {
+  background-color: #7b1173;
+  box-shadow: 0 5px #666;
+  transform: translateY(2px);
+}

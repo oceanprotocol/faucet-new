@@ -70,8 +70,8 @@ app.get("/send", async (req, res) => {
                 console.log("txHash - ", txHash);
                 let balance = await getBalance();
                 res.render("index.ejs", {
-                  message: `Great!! test OCEANs are on the way - ${txHash}`,
-                  link: `https://rinkeby.etherscan.io/tx/${txHash}`,
+                  message: `Great!! test OCEANs are on the way !!`,
+                  txHash,
                   success: true,
                   balance
                 });

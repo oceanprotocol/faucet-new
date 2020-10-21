@@ -51,7 +51,7 @@
                       <% if(message && success) { %>
                         <div class="notify text-center">
                         <h5 class="success"><%= message %></h5>
-                        <a><%= link %></a>
+                        <a target="_blank" href="https://rinkeby.etherscan.io/tx/<%= txHash %>"><%= txHash%></a>
                       </div>
                       <% } else { %>
                         <div class="notify text-center">

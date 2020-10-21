@@ -48,16 +48,16 @@
                         <button type="submit" class="btn btn-primary skip-dark" id="createBtn">Get 10 OCEAN</button>
                         <h6 class="balance">Faucet Balance - <%= balance %> OCEAN</h6>
                       </div>
-                      <% if(message && success) { %>
-                        <div class="notify text-center">
-                        <h5 class="success"><%= message %></h5>
-                        <a target="_blank" href="https://rinkeby.etherscan.io/tx/<%= txHash %>"><%= txHash%></a>
-                      </div>
-                      <% } else { %>
-                        <div class="notify text-center">
-                            <h5 class="error"><%= message %></h5>
-                          </div>
+                      <div class="notify text-center">
+                        <% if(message) { %>
+                          <% if(status) { %>
+                            <h5 class="text-success"><%= message %></h5>
+                            <a target="_blank" href="https://rinkeby.etherscan.io/tx/<%= txHash %>"><%= txHash%></a>
+                        <% } else { %>
+                            <h5 class="text-danger"><%= message %></h5>
+                        <% } %>
                       <% } %>
+                    </div>
                      
                     </form>
                  

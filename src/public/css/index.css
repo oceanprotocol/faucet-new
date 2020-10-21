@@ -124,14 +124,6 @@
   margin-top: 5%;
 }
 
-.success {
-  color: "green";
-}
-
-.error {
-  color: "red";
-}
-
 .balance {
   text-align: end;
   margin-top: 10px;
@@ -147,6 +139,7 @@
   border-color: #f0267e;
 }
 
+.btn-primary:visited,
 .btn-primary:active {
   background-color: #7b1173;
   box-shadow: 0 5px #666;

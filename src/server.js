@@ -100,7 +100,7 @@ async function getBalance() {
   let tokenInst = getTokenInstance();
   let bal = await tokenInst.methods.balanceOf(process.env.FROM).call();
   let balance = web3.utils.fromWei(bal, "ether");
-  return balance;
+  return Math.floor(balance);
 }
 
 function getTokenInstance() {

@@ -11,14 +11,14 @@ var client = null;
 require("dotenv").config();
 
 var tokenInstance = null;
-const infura_apikey = process.env.INFURA_NODE_ID;
+const rpc = process.env.RPC;
 
 const provider = new HDWalletProvider(
   process.env.SEED_PHRASE,
-  "https://rinkeby.infura.io/v3/" + infura_apikey
+  rpc
 );
 const web3 = new Web3(provider);
-
+const account = provider.getAddress(0)
 const app = express();
 app.use(bodyParser.urlencoded({ extended: false }));
 
@@ -36,7 +36,7 @@ app.get("/send", async (req, res) => {
     const url_parts = url.parse(req.url, true);
     const query = url_parts.query;
 
-    const from = process.env.FROM;
+    const from = account;
     const to = query.address;
     const value = web3.utils.toWei(process.env.TOKEN_AMOUNT, "ether");
     //check if its valid ETH address
@@ -98,7 +98,7 @@ app.get("/send", async (req, res) => {
 
 async function getBalance() {
   let tokenInst = getTokenInstance();
-  let bal = await tokenInst.methods.balanceOf(process.env.FROM).call();
+  let bal = await tokenInst.methods.balanceOf(account).call();
   let balance = web3.utils.fromWei(bal, "ether");
   return Math.floor(balance);
 }

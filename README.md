@@ -1,4 +1,4 @@
-### Faucet for OCEAN tokens on rinkeby network
+### Faucet for OCEAN tokens on test networks
 
 #### Getting started
 

@@ -52,7 +52,7 @@
                         <% if(message) { %>
                           <% if(status) { %>
                             <h5 class="text-success"><%= message %></h5>
-                            <a target="_blank" href="https://rinkeby.etherscan.io/tx/<%= txHash %>"><%= txHash%></a>
+                            <%= txHash%>
                         <% } else { %>
                             <h5 class="text-danger"><%= message %></h5>
                         <% } %>

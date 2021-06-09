@@ -7,8 +7,9 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
-    "lint": "eslint --ignore-path .gitignore --ext .js",
-    "format": "prettier --ignore-path .gitignore './**/*.{css,yml,js,ts,tsx,json}' --write"
+    "lint": "eslint --ignore-path .gitignore --ext .js .",
+    "format": "prettier --ignore-path .gitignore './**/*.{css,yml,js,ts,tsx,json}' --write",
+    "prepare": "husky install"
   },
   "author": "",
   "license": "ISC",

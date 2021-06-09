@@ -31,7 +31,7 @@ app.get('/send', async (req, res) => {
       req.headers['x-forwarded-for'] || req.connection.remoteAddress
     console.log(`ip address - `, ipAddress)
     const url_parts = url.parse(req.url, true)
-    const query = url_parts.query
+    const { query } = url_parts
 
     const from = account
     const to = query.address

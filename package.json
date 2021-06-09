@@ -8,6 +8,7 @@
     "start": "node src/server.js",
     "dev": "nodemon src/server.js",
     "lint": "eslint --ignore-path .gitignore --ext .js .",
+    "lint:fix": "eslint --fix .",
     "format": "prettier --ignore-path .gitignore './**/*.{css,yml,js,ts,tsx,json}' --write",
     "prepare": "husky install"
   },

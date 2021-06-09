@@ -1,0 +1,27 @@
+{
+  "parser": "@babel/eslint-parser",
+  "parserOptions": {
+    "requireConfigFile": false
+  },
+  "extends": ["eslint:recommended", "prettier"],
+  "env": { "es6": true, "browser": true, "node": true, "jest": true },
+  "ignorePatterns": ["src/public/"],
+  "rules": {
+    "no-empty": ["error", { "allowEmptyCatch": true }],
+    "prefer-destructuring": ["warn", { "object": true, "array": false }],
+    "no-dupe-class-members": ["warn"],
+    "no-useless-constructor": ["warn"],
+    "no-unused-vars": ["warn"],
+    "constructor-super": ["warn"]
+  },
+  "overrides": [
+    {
+      "files": ["**/*.js"],
+      "extends": ["plugin:prettier/recommended", "prettier"],
+      "plugins": ["prettier"],
+      "rules": {
+        "no-use-before-define": "off"
+      }
+    }
+  ]
+}

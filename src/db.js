@@ -1,4 +1,4 @@
-MongoClient = require("mongodb") . MongoClient;
+const MongoClient = require("mongodb").MongoClient;
 require("dotenv").config();
 var client = null;
 

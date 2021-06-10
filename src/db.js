@@ -22,6 +22,25 @@ async function connection() {
   }
 }
 
+async function find(address, callback) {
+  console.log('Address', address)
+  try {
+    db.all(
+      `SELECT DISTINCT wallet address FROM users ORDER BY ip`,
+      [address],
+      function (err, row) {
+        if (err) {
+          return console.log(err.message)
+        }
+        console.log(`A row has been found ${row}`)
+        callback(row)
+      }
+    )
+  } catch (err) {
+    console.error(err)
+  }
+}
+
 async function insert(ip, wallet, date) {
   // Insert some documents
   try {
@@ -41,4 +60,4 @@ async function insert(ip, wallet, date) {
   }
 }
 
-module.exports = { connection, insert }
+module.exports = { connection, insert, find }

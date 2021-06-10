@@ -40,46 +40,41 @@ app.get('/send', async (req, res) => {
 
     if (web3.utils.isAddress(to)) {
       //check if this user is in cool down period
-      await find(
-        {
-          $or: [{ wallet: query.address }]
-        },
-        async (records) => {
-          console.log(records[0])
-          if (records[0] && !isAllowed(records[0].lastUpdatedOn)) {
-            res.render('index.ejs', {
-              message: 'You have to wait 24 hours between faucet requests',
-              status: false,
-              balance
+      await find(query.address, async (records) => {
+        console.log(records[0])
+        if (records[0] && !isAllowed(records[0].lastUpdatedOn)) {
+          res.render('index.ejs', {
+            message: 'You have to wait 24 hours between faucet requests',
+            status: false,
+            balance
+          })
+        } else {
+          //insert ip address into db
+          await insert(
+            { ip: ipAddress, wallet: to, lastUpdatedOn: Date.now() },
+            (result) => console.log(result)
+          )
+
+          //create token instance from abi and contract address
+          const tokenInst = getTokenInstance()
+
+          tokenInst.methods
+            .transfer(to, value)
+            .send({ from }, async function (error, txHash) {
+              if (!error) {
+                console.log('txHash - ', txHash)
+                res.render('index.ejs', {
+                  message: `Great!! test OCEANs are on the way !!`,
+                  txHash,
+                  status: true,
+                  balance
+                })
+              } else {
+                console.error(error)
+              }
             })
-          } else {
-            //insert ip address into db
-            await insert(
-              { ip: ipAddress, wallet: to, lastUpdatedOn: Date.now() },
-              (result) => console.log(result)
-            )
-
-            //create token instance from abi and contract address
-            const tokenInst = getTokenInstance()
-
-            tokenInst.methods
-              .transfer(to, value)
-              .send({ from }, async function (error, txHash) {
-                if (!error) {
-                  console.log('txHash - ', txHash)
-                  res.render('index.ejs', {
-                    message: `Great!! test OCEANs are on the way !!`,
-                    txHash,
-                    status: true,
-                    balance
-                  })
-                } else {
-                  console.error(error)
-                }
-              })
-          }
         }
-      )
+      })
     } else {
       //handle incorrect address response
       res.render('index.ejs', {

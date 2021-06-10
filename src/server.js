@@ -58,7 +58,7 @@ app.get('/send', async (req, res) => {
               { ip: ipAddress, wallet: to, lastUpdatedOn: Date.now() },
               (result) => console.log(result)
             )
-            const tx = await sendFunds(to, value)
+            const tx = await sendFunds(from, to, value)
             if (tx) {
               console.log('txHash - ', tx)
               res.render('index.ejs', {

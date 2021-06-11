@@ -25,7 +25,7 @@ async function connection() {
 async function find(address, callback) {
   try {
     db.all(
-      `SELECT wallet, lastUpdatedOn FROM users WHERE wallet = "${address}"`,
+      `SELECT wallet, lastUpdatedOn FROM users WHERE wallet = "${address}" ORDER BY lastUpdatedOn DESC`,
       [],
       function (err, row) {
         if (err) {

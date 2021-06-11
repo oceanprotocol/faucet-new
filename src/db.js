@@ -23,11 +23,10 @@ async function connection() {
 }
 
 async function find(address, callback) {
-  console.log('Address', address)
   try {
     db.all(
-      `SELECT DISTINCT wallet address FROM users ORDER BY ip`,
-      [address],
+      `SELECT wallet, lastUpdatedOn FROM users WHERE wallet = "${address}"`,
+      [],
       function (err, row) {
         if (err) {
           return console.log(err.message)

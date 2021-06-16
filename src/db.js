@@ -24,6 +24,19 @@ async function connection() {
 
 async function find(address, callback) {
   try {
+    db.all(`SELECT * FROM users`, [], function (err, db) {
+      if (err) {
+        return console.log(err.message)
+      }
+      db.forEach((element) => {
+        console.log('DB:', element, element.ip, element.wallet)
+      })
+    })
+  } catch (err) {
+    console.error(err)
+  }
+
+  try {
     db.all(
       `SELECT wallet, lastUpdatedOn FROM users WHERE wallet = "${address}" ORDER BY lastUpdatedOn DESC`,
       [],
@@ -40,20 +53,33 @@ async function find(address, callback) {
   }
 }
 
-async function insert(ip, wallet, date) {
+async function insert(record, callback) {
+  console.log('Inserting: ', record.ip, record.wallet, record.lastUpdatedOn)
   // Insert some documents
   try {
     db.run(
       `INSERT INTO users(ip, wallet, lastUpdatedOn) VALUES(?, ?, ?)`,
-      [ip, wallet, date],
+      [record.ip, record.wallet, record.lastUpdatedOn],
       function (err) {
         if (err) {
           return console.log(err.message)
         }
         // get the last insert id
         console.log(`A row has been inserted with rowid ${this.lastID}`)
-      }
+        console.log(`This row has been inserted: ${this.changes}`)
+      },
+      callback()
     )
+  } catch (err) {
+    console.error(err)
+  }
+  try {
+    db.all(`SELECT * FROM users`, [], function (err, db) {
+      if (err) {
+        return console.log(err.message)
+      }
+      console.log(`DB after Insert: ${db}`)
+    })
   } catch (err) {
     console.error(err)
   }

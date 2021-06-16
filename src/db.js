@@ -5,16 +5,17 @@ let db
 async function connection() {
   try {
     db = new sqlite3.Database(
-      `${process.env.DB_PATH}`,
+      process.env.DB_PATH,
       sqlite3.OPEN_READWRITE,
       (err) => {
         if (err) {
-          return console.error(err.message)
+          return console.log('Could not connect to database', err)
+        } else {
+          console.log('Connected to database')
+          db.run(
+            'CREATE TABLE IF NOT EXISTS users(ip text, wallet text, lastUpdatedOn integer)'
+          )
         }
-        console.log('Connected to the in-memory SQlite database.')
-        db.run(
-          'CREATE TABLE IF NOT EXISTS users(ip text, wallet text, lastUpdatedOn integer)'
-        )
       }
     )
   } catch (err) {
@@ -24,19 +25,6 @@ async function connection() {
 
 async function find(address, callback) {
   try {
-    db.all(`SELECT * FROM users`, [], function (err, db) {
-      if (err) {
-        return console.log(err.message)
-      }
-      db.forEach((element) => {
-        console.log('DB:', element, element.ip, element.wallet)
-      })
-    })
-  } catch (err) {
-    console.error(err)
-  }
-
-  try {
     db.all(
       `SELECT wallet, lastUpdatedOn FROM users WHERE wallet = "${address}" ORDER BY lastUpdatedOn DESC`,
       [],
@@ -44,7 +32,6 @@ async function find(address, callback) {
         if (err) {
           return console.log(err.message)
         }
-        console.log(`A row has been found ${row}`)
         callback(row)
       }
     )
@@ -65,21 +52,10 @@ async function insert(record, callback) {
           return console.log(err.message)
         }
         // get the last insert id
-        console.log(`A row has been inserted with rowid ${this.lastID}`)
-        console.log(`This row has been inserted: ${this.changes}`)
       },
+
       callback()
     )
-  } catch (err) {
-    console.error(err)
-  }
-  try {
-    db.all(`SELECT * FROM users`, [], function (err, db) {
-      if (err) {
-        return console.log(err.message)
-      }
-      console.log(`DB after Insert: ${db}`)
-    })
   } catch (err) {
     console.error(err)
   }

@@ -1,51 +1,64 @@
-const { MongoClient } = require('mongodb')
 require('dotenv').config()
-var client = null
+const sqlite3 = require('sqlite3').verbose()
+let db
 
-// Connection URL
-
-let password = encodeURIComponent(process.env.DB_PASSWORD)
-const url = `mongodb://${process.env.DB_USER}:${password}@${process.env.DB_HOST}:${process.env.DB_PORT}/${process.env.DB_NAME}`
-console.log('URL - ', url)
-// Use connect method to connect to the server
 async function connection() {
   try {
-    client = await MongoClient.connect(url, { useUnifiedTopology: true })
-    console.log('Connected successfully to server')
-    return client
+    db = new sqlite3.Database(
+      process.env.DB_PATH,
+      sqlite3.OPEN_READWRITE,
+      (err) => {
+        if (err) {
+          return console.log('Could not connect to database', err)
+        } else {
+          console.log('Connected to database')
+          db.run(
+            'CREATE TABLE IF NOT EXISTS users(ip text, wallet text, lastUpdatedOn integer)'
+          )
+        }
+      }
+    )
   } catch (err) {
     console.error(err)
   }
 }
 
-async function insert(records, callback) {
-  // Get the documents collection
-  console.log('client - ', client)
-  let db = client.db(process.env.DB_NAME)
-  const collection = db.collection('records')
+async function find(address, callback) {
+  try {
+    db.all(
+      `SELECT wallet, lastUpdatedOn FROM users WHERE wallet = "${address}" ORDER BY lastUpdatedOn DESC`,
+      [],
+      function (err, row) {
+        if (err) {
+          return console.log(err.message)
+        }
+        callback(row)
+      }
+    )
+  } catch (err) {
+    console.error(err)
+  }
+}
+
+async function insert(record, callback) {
+  console.log('Inserting: ', record.ip, record.wallet, record.lastUpdatedOn)
   // Insert some documents
   try {
-    await collection.save(records, function (err, result) {
-      console.log('Inserted into database')
-      callback(result)
-    })
+    db.run(
+      `INSERT INTO users(ip, wallet, lastUpdatedOn) VALUES(?, ?, ?)`,
+      [record.ip, record.wallet, record.lastUpdatedOn],
+      function (err) {
+        if (err) {
+          return console.log(err.message)
+        }
+        // get the last insert id
+      },
+
+      callback()
+    )
   } catch (err) {
     console.error(err)
   }
-}
-
-async function find(query, callback) {
-  // Get the documents collection
-  let db = client.db(process.env.DB_NAME)
-  const collection = db.collection('records')
-  collection
-    .find(query)
-    .sort({ lastUpdatedOn: -1 })
-    .toArray(function (err, docs) {
-      console.log('Found the following records')
-      console.log(docs)
-      callback(docs)
-    })
 }
 
 module.exports = { connection, insert, find }

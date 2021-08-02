@@ -57,7 +57,6 @@ app.get('/send', async (req, res) => {
 
           //create token instance from abi and contract address
           const tokenInst = getTokenInstance()
-
           tokenInst.methods
             .transfer(to, value)
             .send({ from }, async function (error, txHash) {
@@ -89,8 +88,16 @@ app.get('/send', async (req, res) => {
 })
 
 async function getBalance() {
-  let tokenInst = getTokenInstance()
-  let bal = await tokenInst.methods.balanceOf(account).call()
+  let bal
+  if (
+    process.env.TOKEN_CONTRACT_ADDRESS !=
+    '0x0000000000000000000000000000000000000000'
+  ) {
+    let tokenInst = getTokenInstance()
+    bal = await tokenInst.methods.balanceOf(account).call()
+  } else {
+    bal = await web3.eth.getBalance(account)
+  }
   let balance = web3.utils.fromWei(bal, 'ether')
   return Math.floor(balance)
 }
@@ -106,6 +113,25 @@ function getTokenInstance() {
   return tokenInstance
 }
 
+async function sendFunds(from, to, value) {
+  let tx
+  try {
+    if (
+      process.env.TOKEN_CONTRACT_ADDRESS !=
+      '0x0000000000000000000000000000000000000000'
+    ) {
+      const tokenInst = getTokenInstance()
+      tx = await tokenInst.methods.transfer(to, value).send({ from })
+    } else {
+      // sending ETH
+      tx = await web3.eth.sendTransaction({ from, to, value })
+    }
+    return tx.transactionHash
+  } catch (e) {
+    console.error(e.message)
+  }
+  return null
+}
 const port = process.env.PORT || 4000
 
 app.set('view engine', 'ejs')

@@ -17,6 +17,9 @@ const provider = new HDWalletProvider(process.env.SEED_PHRASE, rpc)
 const web3 = new Web3(provider)
 const account = provider.getAddress(0)
 const app = express()
+const tokenName = process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
+const tokenAmount = web3.utils.toWei(process.env.TOKEN_AMOUNT, 'ether')
+
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', async (req, res) => {
@@ -25,8 +28,9 @@ app.get('/', async (req, res) => {
     message: null,
     status: false,
     balance,
-    amount: process.env.TOKEN_AMOUNT,
-    tokenname: process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
+    tokenAmount,
+    tokenName,
+    account
   })
 })
 
@@ -53,8 +57,9 @@ app.get('/send', async (req, res) => {
             message: 'You have to wait 24 hours between faucet requests',
             status: false,
             balance,
-            amount: process.env.TOKEN_AMOUNT,
-            tokenname: process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
+            tokenAmount,
+            tokenName,
+            account
           })
         } else {
           //insert ip address into db
@@ -79,10 +84,9 @@ app.get('/send', async (req, res) => {
                     txHash,
                     status: true,
                     balance,
-                    amount: process.env.TOKEN_AMOUNT,
-                    tokenname: process.env.TOKEN_NAME
-                      ? process.env.TOKEN_NAME
-                      : 'OCEAN'
+                    tokenAmount,
+                    tokenName,
+                    account
                   })
                 } else {
                   console.error(error)
@@ -100,10 +104,9 @@ app.get('/send', async (req, res) => {
                     txHash,
                     status: true,
                     balance,
-                    amount: process.env.TOKEN_AMOUNT,
-                    tokenname: process.env.TOKEN_NAME
-                      ? process.env.TOKEN_NAME
-                      : 'OCEAN'
+                    tokenAmount,
+                    tokenName,
+                    account
                   })
                 } else {
                   console.error(error)
@@ -118,7 +121,10 @@ app.get('/send', async (req, res) => {
       res.render('index.ejs', {
         message: `Please enter valid Ethereum Wallet Address`,
         status: false,
-        balance
+        balance,
+        tokenAmount,
+        tokenName,
+        account
       })
     }
   } catch (err) {

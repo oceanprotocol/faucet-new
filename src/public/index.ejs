@@ -30,7 +30,7 @@
         <div class="section">
           <div class="container">
             <div class="center">
-              <h4 class="title title-2"><%= tokenname %> Faucet by Ocean Protocol</h4>
+              <h4 class="title title-2"><%= tokenName %> Faucet by Ocean Protocol</h4>
             </div>
             
             <div class="row align-items-center">
@@ -45,8 +45,9 @@
 
                     </div>
                     <div class="col-md-12 col-xl-12 text-center">
-                        <button type="submit" class="btn btn-primary skip-dark" id="createBtn">Get <%= amount %> <%= tokenname %></button>
-                        <h6 class="balance">Faucet Balance - <%= balance %> <%= tokenname %></h6>
+                        <button type="submit" class="btn btn-primary skip-dark" id="createBtn">Get <%= tokenAmount %> <%= tokenName %></button>
+                        <h6 class="balance">Faucet Balance - <%= balance %> <%= tokenName %></h6>
+                        <h6 class="balance">Faucet Address - <%= account %></h6>
                       </div>
                       <div class="notify text-center">
                         <% if(message) { %>

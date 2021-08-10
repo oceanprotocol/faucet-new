@@ -18,7 +18,7 @@ const web3 = new Web3(provider)
 const account = provider.getAddress(0)
 const app = express()
 const tokenName = process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
-const tokenAmount = web3.utils.toWei(process.env.TOKEN_AMOUNT, 'ether')
+const tokenAmount = process.env.TOKEN_AMOUNT
 
 app.use(bodyParser.urlencoded({ extended: false }))
 

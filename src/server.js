@@ -21,7 +21,12 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', async (req, res) => {
   let balance = await getBalance()
-  res.render('index.ejs', { message: null, status: false, balance })
+  res.render('index.ejs', {
+    message: null,
+    status: false,
+    balance,
+    amount: process.env.TOKEN_AMOUNT
+  })
 })
 
 app.get('/send', async (req, res) => {
@@ -55,23 +60,49 @@ app.get('/send', async (req, res) => {
             (result) => console.log(result)
           )
 
-          //create token instance from abi and contract address
-          const tokenInst = getTokenInstance()
-          tokenInst.methods
-            .transfer(to, value)
-            .send({ from }, async function (error, txHash) {
-              if (!error) {
-                console.log('txHash - ', txHash)
-                res.render('index.ejs', {
-                  message: `Great!! test OCEANs are on the way !!`,
-                  txHash,
-                  status: true,
-                  balance
-                })
-              } else {
-                console.error(error)
+          if (
+            process.env.TOKEN_CONTRACT_ADDRESS !=
+            '0x0000000000000000000000000000000000000000'
+          ) {
+            const tokenInst = getTokenInstance()
+            tx = await tokenInst.methods.transfer(to, value).send({ from })
+
+            //create token instance from abi and contract address
+            const tokenInst = getTokenInstance()
+            tokenInst.methods
+              .transfer(to, value)
+              .send({ from }, async function (error, txHash) {
+                if (!error) {
+                  console.log('txHash - ', txHash)
+                  res.render('index.ejs', {
+                    message: `Great!! test OCEANs are on the way !!`,
+                    txHash,
+                    status: true,
+                    balance
+                  })
+                } else {
+                  console.error(error)
+                }
+              })
+          } else {
+            // sending ETH
+            web3.eth.sendTransaction(
+              { from, to, value },
+              async function (error, txHash) {
+                if (!error) {
+                  console.log('txHash - ', txHash)
+                  res.render('index.ejs', {
+                    message: `Great!! Network funds are on the way !!`,
+                    txHash,
+                    status: true,
+                    balance
+                  })
+                } else {
+                  console.error(error)
+                }
               }
-            })
+            )
+          }
         }
       })
     } else {
@@ -113,25 +144,6 @@ function getTokenInstance() {
   return tokenInstance
 }
 
-async function sendFunds(from, to, value) {
-  let tx
-  try {
-    if (
-      process.env.TOKEN_CONTRACT_ADDRESS !=
-      '0x0000000000000000000000000000000000000000'
-    ) {
-      const tokenInst = getTokenInstance()
-      tx = await tokenInst.methods.transfer(to, value).send({ from })
-    } else {
-      // sending ETH
-      tx = await web3.eth.sendTransaction({ from, to, value })
-    }
-    return tx.transactionHash
-  } catch (e) {
-    console.error(e.message)
-  }
-  return null
-}
 const port = process.env.PORT || 4000
 
 app.set('view engine', 'ejs')

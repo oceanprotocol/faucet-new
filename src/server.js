@@ -67,9 +67,6 @@ app.get('/send', async (req, res) => {
             process.env.TOKEN_CONTRACT_ADDRESS !=
             '0x0000000000000000000000000000000000000000'
           ) {
-            const tokenInst = getTokenInstance()
-            tx = await tokenInst.methods.transfer(to, value).send({ from })
-
             //create token instance from abi and contract address
             const tokenInst = getTokenInstance()
             tokenInst.methods

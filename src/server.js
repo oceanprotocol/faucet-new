@@ -25,7 +25,8 @@ app.get('/', async (req, res) => {
     message: null,
     status: false,
     balance,
-    amount: process.env.TOKEN_AMOUNT
+    amount: process.env.TOKEN_AMOUNT,
+    tokenname: process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
   })
 })
 
@@ -51,7 +52,9 @@ app.get('/send', async (req, res) => {
           res.render('index.ejs', {
             message: 'You have to wait 24 hours between faucet requests',
             status: false,
-            balance
+            balance,
+            amount: process.env.TOKEN_AMOUNT,
+            tokenname: process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
           })
         } else {
           //insert ip address into db
@@ -78,7 +81,11 @@ app.get('/send', async (req, res) => {
                     message: `Great!! test OCEANs are on the way !!`,
                     txHash,
                     status: true,
-                    balance
+                    balance,
+                    amount: process.env.TOKEN_AMOUNT,
+                    tokenname: process.env.TOKEN_NAME
+                      ? process.env.TOKEN_NAME
+                      : 'OCEAN'
                   })
                 } else {
                   console.error(error)
@@ -95,7 +102,11 @@ app.get('/send', async (req, res) => {
                     message: `Great!! Network funds are on the way !!`,
                     txHash,
                     status: true,
-                    balance
+                    balance,
+                    amount: process.env.TOKEN_AMOUNT,
+                    tokenname: process.env.TOKEN_NAME
+                      ? process.env.TOKEN_NAME
+                      : 'OCEAN'
                   })
                 } else {
                   console.error(error)

@@ -12,6 +12,17 @@ npm i
 npm start
 ```
 
+## ENV List
+
+- DB_PATH = specifiy the folder name to use for sqlite
+- RPC = rpc connection
+- SEED_PHRASE = private key (or seed) used by faucet
+- TOKEN_NAME = (optional) token name to be displayed
+- TOKEN_AMOUNT = amount of tokens to dispense
+- TOKEN_CONTRACT_ADDRESS = token contract address (use 0x0000000000000000000000000000000000000000 to dispense ETH)
+- PORT = (optional) default: 4000
+- COOLING_PERIOD_IN_HOURS = minimum interval allowed between dispenses
+
 ## ✨ Code Style
 
 Code style is automatically enforced through [ESLint](https://eslint.org) & [Prettier](https://prettier.io) rules:

@@ -8,35 +8,41 @@ const rpc = process.env.RPC
 const provider = new HDWalletProvider(process.env.SEED_PHRASE, rpc)
 const web3 = new Web3(provider)
 function getTokenInstance() {
-  //create token instance from abi and contract address
-  const tokenInstance = new web3.eth.Contract(
-    abi,
-    process.env.TOKEN_CONTRACT_ADDRESS
-  )
-  return tokenInstance
+  try {
+    //create token instance from abi and contract address
+    const tokenInstance = new web3.eth.Contract(
+      abi,
+      process.env.TOKEN_CONTRACT_ADDRESS
+    )
+    // console.log('tokenInstance', tokenInstance)
+    return tokenInstance
+  } catch (error) {
+    console.log('Error 3', error)
+  }
 }
 
-const getOceanBallance = async () => {
+const getOceanBalance = async (address) => {
   try {
     const contract = await getTokenInstance(web3)
-    const account = await web3.eth.getAccounts()
+    // const account = await web3.eth.getAccounts()
+    // console.log('account', account)
     const ballanceOcean = await contract.methods
-      .balanceOf(String(account))
+      .balanceOf(String(address))
       .call()
     return ballanceOcean
   } catch (error) {
-    console.log(error)
+    console.log('Error 1', error)
   }
 }
 
-const getEthBallance = async () => {
+const getEthBalance = async (address) => {
   try {
-    const account = await web3.eth.getAccounts()
-    const ballanceEth = await web3.eth.getBalance(String(account))
-
+    // const account = await web3.eth.getAccounts()
+    // console.log('account', account)
+    const ballanceEth = await web3.eth.getBalance(String(address))
     return ballanceEth
   } catch (error) {
-    console.log(error)
+    console.log('Error 2', error)
   }
 }
-module.exports = { getOceanBallance, getEthBallance }
+module.exports = { getOceanBalance, getEthBalance }

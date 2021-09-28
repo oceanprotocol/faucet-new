@@ -7,6 +7,7 @@ const path = require('path')
 const abi = require('./abi/token')
 const { connection, insert, find } = require('./db')
 const { isAllowed } = require('./util')
+const { getOceanBalance, getEthBalance } = require('./utils/getBalance')
 var client = null
 require('dotenv').config()
 
@@ -24,6 +25,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', async (req, res) => {
   let balance = await getBalance()
+
   res.render('index.ejs', {
     message: null,
     status: false,
@@ -46,76 +48,110 @@ app.get('/send', async (req, res) => {
     const from = account
     const to = query.address
     const value = web3.utils.toWei(process.env.TOKEN_AMOUNT, 'ether')
-    //check if its valid ETH address
 
+    // Check if its valid ETH address
     if (web3.utils.isAddress(to)) {
-      //check if this user is in cool down period
-      await find(query.address, async (records) => {
-        console.log(records[0])
-        if (records[0] && !isAllowed(records[0].lastUpdatedOn)) {
-          res.render('index.ejs', {
-            message: 'You have to wait 24 hours between faucet requests',
-            status: false,
-            balance,
-            tokenAmount,
-            tokenName,
-            account
-          })
-        } else {
-          //insert ip address into db
-          await insert(
-            { ip: ipAddress, wallet: to, lastUpdatedOn: Date.now() },
-            (result) => console.log(result)
-          )
-
-          if (
-            process.env.TOKEN_CONTRACT_ADDRESS !=
-            '0x0000000000000000000000000000000000000000'
-          ) {
-            //create token instance from abi and contract address
-            const tokenInst = getTokenInstance()
-            tokenInst.methods
-              .transfer(to, value)
-              .send({ from }, async function (error, txHash) {
-                if (!error) {
-                  console.log('txHash - ', txHash)
-                  res.render('index.ejs', {
-                    message: `Great!! test OCEANs are on the way !!`,
-                    txHash,
-                    status: true,
-                    balance,
-                    tokenAmount,
-                    tokenName,
-                    account
-                  })
-                } else {
-                  console.error(error)
-                }
-              })
+      const oceanBalance = await getOceanBalance(to)
+      const EthBalance = await getEthBalance(to)
+      console.log('oceanBalance', oceanBalance)
+      console.log('EthBalance', EthBalance)
+      if (
+        process.env.TOKEN_CONTRACT_ADDRESS ===
+          '0x0000000000000000000000000000000000000000' &&
+        EthBalance > process.env.ETH_BALANCE_LIMIT
+      ) {
+        // handle Ether Balance is more than limit
+        res.render('index.ejs', {
+          message: `You already have ${process.env.BASE_TOKEN_NAME} in your wallet.\nPlease come back when you require ${process.env.BASE_TOKEN_NAME}`,
+          status: false,
+          balance,
+          tokenAmount,
+          tokenName,
+          account
+        })
+      } else if (
+        process.env.TOKEN_CONTRACT_ADDRESS !==
+          '0x0000000000000000000000000000000000000000' &&
+        oceanBalance > process.env.OCEAN_BALANCE_LIMIT
+      ) {
+        // handle Ocean Balance is more than limit
+        res.render('index.ejs', {
+          message: `You already have Ocean in your wallet.\nPlease come back when you require Ocean`,
+          status: false,
+          balance,
+          tokenAmount,
+          tokenName,
+          account
+        })
+      } else {
+        //check if this user is in cool down period
+        await find(query.address, async (records) => {
+          console.log(records[0])
+          if (records[0] && !isAllowed(records[0].lastUpdatedOn)) {
+            res.render('index.ejs', {
+              message: 'You have to wait 24 hours between faucet requests',
+              status: false,
+              balance,
+              tokenAmount,
+              tokenName,
+              account
+            })
           } else {
-            // sending ETH
-            web3.eth.sendTransaction(
-              { from, to, value },
-              async function (error, txHash) {
-                if (!error) {
-                  console.log('txHash - ', txHash)
-                  res.render('index.ejs', {
-                    message: `Great!! Network funds are on the way !!`,
-                    txHash,
-                    status: true,
-                    balance,
-                    tokenAmount,
-                    tokenName,
-                    account
-                  })
-                } else {
-                  console.error(error)
-                }
-              }
+            //insert ip address into db
+            await insert(
+              { ip: ipAddress, wallet: to, lastUpdatedOn: Date.now() },
+              (result) => console.log(result)
             )
+
+            if (
+              process.env.TOKEN_CONTRACT_ADDRESS !=
+              '0x0000000000000000000000000000000000000000'
+            ) {
+              //create token instance from abi and contract address
+              const tokenInst = getTokenInstance()
+              tokenInst.methods
+                .transfer(to, value)
+                .send({ from }, async function (error, txHash) {
+                  if (!error) {
+                    console.log('txHash - ', txHash)
+                    res.render('index.ejs', {
+                      message: `Great!! test OCEANs are on the way !!`,
+                      txHash,
+                      status: true,
+                      balance,
+                      tokenAmount,
+                      tokenName,
+                      account
+                    })
+                  } else {
+                    console.error(error)
+                  }
+                })
+            } else {
+              // sending ETH
+              web3.eth.sendTransaction(
+                { from, to, value },
+                async function (error, txHash) {
+                  if (!error) {
+                    console.log('txHash - ', txHash)
+                    res.render('index.ejs', {
+                      message: `Great!! Network funds are on the way !!`,
+                      txHash,
+                      status: true,
+                      balance,
+                      tokenAmount,
+                      tokenName,
+                      account
+                    })
+                  } else {
+                    console.error(error)
+                  }
+                }
+              )
+            }
           }
-        }
-      })
+        })
+      }
     } else {
       //handle incorrect address response
       res.render('index.ejs', {

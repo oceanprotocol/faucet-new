@@ -7,7 +7,11 @@ const path = require('path')
 const abi = require('./abi/token')
 const { connection, insert, find } = require('./db')
 const { isAllowed } = require('./util')
-const { getOceanBalance, getEthBalance } = require('./utils/getBalance')
+const {
+  getOceanBalance,
+  getEthBalance,
+  getFaucetBalance
+} = require('./utils/getBalance')
 var client = null
 require('dotenv').config()
 
@@ -24,7 +28,7 @@ const tokenAmount = process.env.TOKEN_AMOUNT
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', async (req, res) => {
-  let balance = await getBalance()
+  let balance = await getFaucetBalance(account)
 
   res.render('index.ejs', {
     message: null,
@@ -38,7 +42,7 @@ app.get('/', async (req, res) => {
 
 app.get('/send', async (req, res) => {
   try {
-    let balance = await getBalance()
+    let balance = await getFaucetBalance(account)
     let ipAddress =
       req.headers['x-forwarded-for'] || req.connection.remoteAddress
     console.log(`ip address - `, ipAddress)
@@ -167,21 +171,6 @@ app.get('/send', async (req, res) => {
     console.error(err)
   }
 })
-
-async function getBalance() {
-  let bal
-  if (
-    process.env.TOKEN_CONTRACT_ADDRESS !=
-    '0x0000000000000000000000000000000000000000'
-  ) {
-    let tokenInst = getTokenInstance()
-    bal = await tokenInst.methods.balanceOf(account).call()
-  } else {
-    bal = await web3.eth.getBalance(account)
-  }
-  let balance = web3.utils.fromWei(bal, 'ether')
-  return Math.floor(balance)
-}
 
 function getTokenInstance() {
   if (!tokenInstance) {

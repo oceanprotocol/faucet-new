@@ -7,7 +7,7 @@ const rpc = process.env.RPC
 
 const provider = new HDWalletProvider(process.env.SEED_PHRASE, rpc)
 const web3 = new Web3(provider)
-function getTokenInstance() {
+const getTokenInstance = () => {
   try {
     //create token instance from abi and contract address
     const tokenInstance = new web3.eth.Contract(
@@ -45,4 +45,20 @@ const getEthBalance = async (address) => {
     console.log('Error 2', error)
   }
 }
-module.exports = { getOceanBalance, getEthBalance }
+
+const getFaucetBalance = async (account) => {
+  let bal
+  if (
+    process.env.TOKEN_CONTRACT_ADDRESS !=
+    '0x0000000000000000000000000000000000000000'
+  ) {
+    let tokenInst = getTokenInstance()
+    bal = await tokenInst.methods.balanceOf(account).call()
+  } else {
+    bal = await web3.eth.getBalance(account)
+  }
+  let balance = web3.utils.fromWei(bal, 'ether')
+  return Math.floor(balance)
+}
+
+module.exports = { getOceanBalance, getEthBalance, getFaucetBalance }

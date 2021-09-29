@@ -27,6 +27,13 @@ const getEthBalance = async (address) => {
   }
 }
 
+const getFaucetGasBalance = async (account) => {
+  const bal = await web3.eth.getBalance(account)
+
+  let balance = web3.utils.fromWei(bal, 'ether')
+  return Number(balance).toFixed(4)
+}
+
 const getFaucetBalance = async (account) => {
   let bal
   if (
@@ -42,4 +49,9 @@ const getFaucetBalance = async (account) => {
   return Math.floor(balance)
 }
 
-module.exports = { getOceanBalance, getEthBalance, getFaucetBalance }
+module.exports = {
+  getOceanBalance,
+  getEthBalance,
+  getFaucetBalance,
+  getFaucetGasBalance
+}

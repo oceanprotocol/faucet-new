@@ -1,10 +1,14 @@
 const { account } = require('../utils/getWeb3')
-const { getFaucetBalance } = require('../utils/getBalance')
+const { getFaucetBalance, getFaucetGasBalance } = require('../utils/getBalance')
 const tokenName = process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
+const baseTokenName = process.env.BASE_TOKEN_NAME
+  ? process.env.BASE_TOKEN_NAME
+  : 'ETH'
 const tokenAmount = process.env.TOKEN_AMOUNT
 
 const homeController = async (res) => {
-  let balance = await getFaucetBalance(account)
+  const balance = await getFaucetBalance(account)
+  const gasBalance = await getFaucetGasBalance(account)
 
   res.render('index.ejs', {
     message: null,
@@ -12,7 +16,9 @@ const homeController = async (res) => {
     balance,
     tokenAmount,
     tokenName,
-    account
+    account,
+    gasBalance,
+    baseTokenName
   })
 }
 

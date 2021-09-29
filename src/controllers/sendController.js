@@ -4,7 +4,7 @@ const { getOceanBalance, getEthBalance } = require('../utils/getBalance')
 const { getTokenInstance } = require('../utils/getTokenInstance')
 const { isAllowed } = require('../utils/getIsAllowed')
 const { insert, find } = require('../db')
-const { homeController } = require('./homeController')
+const { renderHome } = require('./renderHome')
 
 const sendController = async (res, req) => {
   try {
@@ -28,7 +28,7 @@ const sendController = async (res, req) => {
         EthBalance > process.env.ETH_BALANCE_LIMIT
       ) {
         // handle Ether Balance is more than limit
-        homeController(
+        renderHome(
           res,
           `You already have ${process.env.BASE_TOKEN_NAME} in your wallet.\nPlease come back when you require ${process.env.BASE_TOKEN_NAME}`,
           false
@@ -39,7 +39,7 @@ const sendController = async (res, req) => {
         oceanBalance > process.env.OCEAN_BALANCE_LIMIT
       ) {
         // handle Ocean Balance is more than limit
-        homeController(
+        renderHome(
           res,
           `You already have Ocean in your wallet.\nPlease come back when you require Ocean`,
           false
@@ -49,7 +49,7 @@ const sendController = async (res, req) => {
         await find(query.address, async (records) => {
           console.log(records[0])
           if (records[0] && !isAllowed(records[0].lastUpdatedOn)) {
-            homeController(
+            renderHome(
               res,
               'You have to wait 24 hours between faucet requests',
               false
@@ -72,7 +72,7 @@ const sendController = async (res, req) => {
                 .send({ from }, async function (error, txHash) {
                   if (!error) {
                     console.log('txHash - ', txHash)
-                    homeController(
+                    renderHome(
                       res,
                       `Great!! test OCEANs are on the way !!`,
                       true,
@@ -89,7 +89,7 @@ const sendController = async (res, req) => {
                 async function (error, txHash) {
                   if (!error) {
                     console.log('txHash - ', txHash)
-                    homeController(
+                    renderHome(
                       res,
                       `Great!! Network funds are on the way !!`,
                       true,
@@ -106,7 +106,7 @@ const sendController = async (res, req) => {
       }
     } else {
       //handle incorrect address response
-      homeController(res, `Please enter valid Ethereum Wallet Address`, false)
+      renderHome(res, `Please enter valid Ethereum Wallet Address`, false)
     }
   } catch (err) {
     console.error(err)

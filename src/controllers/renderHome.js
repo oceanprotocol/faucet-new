@@ -6,7 +6,7 @@ const baseTokenName = process.env.BASE_TOKEN_NAME
   : 'ETH'
 const tokenAmount = process.env.TOKEN_AMOUNT
 
-const homeController = async (
+const renderHome = async (
   res,
   message = null,
   status = false,
@@ -28,4 +28,4 @@ const homeController = async (
   })
 }
 
-module.exports = { homeController }
+module.exports = { renderHome }

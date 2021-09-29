@@ -4,7 +4,7 @@ const bodyParser = require('body-parser')
 
 const path = require('path')
 const { connection } = require('./db')
-const { homeController } = require('./controllers/homeController')
+const { renderHome } = require('./controllers/renderHome')
 const { sendController } = require('./controllers/sendController')
 
 const app = express()
@@ -12,7 +12,7 @@ const app = express()
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', async (req, res) => {
-  homeController(res)
+  renderHome(res)
 })
 
 app.get('/send', async (req, res) => {

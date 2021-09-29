@@ -1,19 +1,13 @@
 const url = require('url')
 const { web3, account } = require('../utils/getWeb3')
-const {
-  getOceanBalance,
-  getEthBalance,
-  getFaucetBalance
-} = require('../utils/getBalance')
+const { getOceanBalance, getEthBalance } = require('../utils/getBalance')
 const { getTokenInstance } = require('../utils/getTokenInstance')
 const { isAllowed } = require('../utils/getIsAllowed')
 const { insert, find } = require('../db')
-const tokenName = process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
-const tokenAmount = process.env.TOKEN_AMOUNT
+const { homeController } = require('./homeController')
 
 const sendController = async (res, req) => {
   try {
-    let balance = await getFaucetBalance(account)
     let ipAddress =
       req.headers['x-forwarded-for'] || req.connection.remoteAddress
     console.log(`ip address - `, ipAddress)
@@ -28,49 +22,38 @@ const sendController = async (res, req) => {
     if (web3.utils.isAddress(to)) {
       const oceanBalance = await getOceanBalance(to)
       const EthBalance = await getEthBalance(to)
-      console.log('oceanBalance', oceanBalance)
-      console.log('EthBalance', EthBalance)
       if (
         process.env.TOKEN_CONTRACT_ADDRESS ===
           '0x0000000000000000000000000000000000000000' &&
         EthBalance > process.env.ETH_BALANCE_LIMIT
       ) {
         // handle Ether Balance is more than limit
-        res.render('index.ejs', {
-          message: `You already have ${process.env.BASE_TOKEN_NAME} in your wallet.\nPlease come back when you require ${process.env.BASE_TOKEN_NAME}`,
-          status: false,
-          balance,
-          tokenAmount,
-          tokenName,
-          account
-        })
+        homeController(
+          res,
+          `You already have ${process.env.BASE_TOKEN_NAME} in your wallet.\nPlease come back when you require ${process.env.BASE_TOKEN_NAME}`,
+          false
+        )
       } else if (
         process.env.TOKEN_CONTRACT_ADDRESS !==
           '0x0000000000000000000000000000000000000000' &&
         oceanBalance > process.env.OCEAN_BALANCE_LIMIT
       ) {
         // handle Ocean Balance is more than limit
-        res.render('index.ejs', {
-          message: `You already have Ocean in your wallet.\nPlease come back when you require Ocean`,
-          status: false,
-          balance,
-          tokenAmount,
-          tokenName,
-          account
-        })
+        homeController(
+          res,
+          `You already have Ocean in your wallet.\nPlease come back when you require Ocean`,
+          false
+        )
       } else {
         //check if this user is in cool down period
         await find(query.address, async (records) => {
           console.log(records[0])
           if (records[0] && !isAllowed(records[0].lastUpdatedOn)) {
-            res.render('index.ejs', {
-              message: 'You have to wait 24 hours between faucet requests',
-              status: false,
-              balance,
-              tokenAmount,
-              tokenName,
-              account
-            })
+            homeController(
+              res,
+              'You have to wait 24 hours between faucet requests',
+              false
+            )
           } else {
             //insert ip address into db
             await insert(
@@ -89,15 +72,12 @@ const sendController = async (res, req) => {
                 .send({ from }, async function (error, txHash) {
                   if (!error) {
                     console.log('txHash - ', txHash)
-                    res.render('index.ejs', {
-                      message: `Great!! test OCEANs are on the way !!`,
-                      txHash,
-                      status: true,
-                      balance,
-                      tokenAmount,
-                      tokenName,
-                      account
-                    })
+                    homeController(
+                      res,
+                      `Great!! test OCEANs are on the way !!`,
+                      true,
+                      txHash
+                    )
                   } else {
                     console.error(error)
                   }
@@ -109,15 +89,12 @@ const sendController = async (res, req) => {
                 async function (error, txHash) {
                   if (!error) {
                     console.log('txHash - ', txHash)
-                    res.render('index.ejs', {
-                      message: `Great!! Network funds are on the way !!`,
-                      txHash,
-                      status: true,
-                      balance,
-                      tokenAmount,
-                      tokenName,
-                      account
-                    })
+                    homeController(
+                      res,
+                      `Great!! Network funds are on the way !!`,
+                      true,
+                      txHash
+                    )
                   } else {
                     console.error(error)
                   }
@@ -129,14 +106,7 @@ const sendController = async (res, req) => {
       }
     } else {
       //handle incorrect address response
-      res.render('index.ejs', {
-        message: `Please enter valid Ethereum Wallet Address`,
-        status: false,
-        balance,
-        tokenAmount,
-        tokenName,
-        account
-      })
+      homeController(res, `Please enter valid Ethereum Wallet Address`, false)
     }
   } catch (err) {
     console.error(err)

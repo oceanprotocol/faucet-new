@@ -2,11 +2,9 @@ const express = require('express')
 const bodyParser = require('body-parser')
 const url = require('url')
 const { web3, account } = require('./getWeb3')
-const HDWalletProvider = require('@truffle/hdwallet-provider')
-const Web3 = require('web3')
 const path = require('path')
 const { connection, insert, find } = require('./db')
-const { isAllowed } = require('./util')
+const { isAllowed } = require('./utils/getIsAllowed')
 const { getTokenInstance } = require('./utils/getTokenInstance')
 const {
   getOceanBalance,
@@ -16,10 +14,6 @@ const {
 
 require('dotenv').config()
 
-const rpc = process.env.RPC
-
-const provider = new HDWalletProvider(process.env.SEED_PHRASE, rpc)
-const account = provider.getAddress(0)
 const app = express()
 const tokenName = process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
 const tokenAmount = process.env.TOKEN_AMOUNT

@@ -7,24 +7,21 @@ const { insert, find } = require('../db')
 const { renderHome } = require('./renderHome')
 
 const sendController = async (res, req) => {
+  const url_parts = url.parse(req.url, true)
+  const { query } = url_parts
+  const from = account
+  const to = query.address
   try {
-    const { message, status } = await isAllowed(req)
+    const { message, status } = await isAllowed(to)
     if (status === false) {
       renderHome(res, message, status)
     } else {
       const ipAddress =
         req.headers['x-forwarded-for'] || req.connection.remoteAddress
-      console.log(`ip address - `, ipAddress)
-      const url_parts = url.parse(req.url, true)
-      const { query } = url_parts
-
-      const from = account
-      const to = query.address
       const value = web3.utils.toWei(process.env.TOKEN_AMOUNT, 'ether')
 
       //check if this user is in cool down period
       await find(query.address, async (records) => {
-        console.log(records[0])
         if (records[0] && !isCoolingDown(records[0].lastUpdatedOn)) {
           renderHome(
             res,
@@ -48,7 +45,6 @@ const sendController = async (res, req) => {
               .transfer(to, value)
               .send({ from }, async function (error, txHash) {
                 if (!error) {
-                  console.log('txHash - ', txHash)
                   renderHome(
                     res,
                     `Great!! test OCEANs are on the way !!`,
@@ -65,7 +61,6 @@ const sendController = async (res, req) => {
               { from, to, value },
               async function (error, txHash) {
                 if (!error) {
-                  console.log('txHash - ', txHash)
                   renderHome(
                     res,
                     `Great!! Network funds are on the way !!`,

@@ -1,13 +1,9 @@
-const url = require('url')
 const { web3 } = require('../utils/getWeb3')
 const { getOceanBalance, getEthBalance } = require('../utils/getBalance')
 
-const isAllowed = async (req) => {
+const isAllowed = async (to) => {
   let message = null
   let status = false
-  const url_parts = url.parse(req.url, true)
-  const { query } = url_parts
-  const to = query.address
   // Check if its valid ETH address
   if (!web3.utils.isAddress(to)) {
     message = `Please enter valid Ethereum Wallet Address`

@@ -1,25 +1,12 @@
 const HDWalletProvider = require('@truffle/hdwallet-provider')
-const abi = require('../abi/token')
 const Web3 = require('web3')
+const { getTokenInstance } = require('./getTokenInstance')
 require('dotenv').config()
 
 const rpc = process.env.RPC
 
 const provider = new HDWalletProvider(process.env.SEED_PHRASE, rpc)
 const web3 = new Web3(provider)
-const getTokenInstance = () => {
-  try {
-    //create token instance from abi and contract address
-    const tokenInstance = new web3.eth.Contract(
-      abi,
-      process.env.TOKEN_CONTRACT_ADDRESS
-    )
-    // console.log('tokenInstance', tokenInstance)
-    return tokenInstance
-  } catch (error) {
-    console.log('Error 3', error)
-  }
-}
 
 const getOceanBalance = async (address) => {
   try {

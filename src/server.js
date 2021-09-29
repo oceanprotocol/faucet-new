@@ -4,18 +4,17 @@ const url = require('url')
 const HDWalletProvider = require('@truffle/hdwallet-provider')
 const Web3 = require('web3')
 const path = require('path')
-const abi = require('./abi/token')
 const { connection, insert, find } = require('./db')
 const { isAllowed } = require('./util')
+const { getTokenInstance } = require('./utils/getTokenInstance')
 const {
   getOceanBalance,
   getEthBalance,
   getFaucetBalance
 } = require('./utils/getBalance')
-var client = null
+
 require('dotenv').config()
 
-var tokenInstance = null
 const rpc = process.env.RPC
 
 const provider = new HDWalletProvider(process.env.SEED_PHRASE, rpc)
@@ -172,17 +171,6 @@ app.get('/send', async (req, res) => {
   }
 })
 
-function getTokenInstance() {
-  if (!tokenInstance) {
-    //create token instance from abi and contract address
-    tokenInstance = new web3.eth.Contract(
-      abi,
-      process.env.TOKEN_CONTRACT_ADDRESS
-    )
-  }
-  return tokenInstance
-}
-
 const port = process.env.PORT || 4000
 
 app.set('view engine', 'ejs')
@@ -190,6 +178,6 @@ app.set('views', path.join(__dirname, '/public'))
 app.use(express.static(__dirname + '/public'))
 
 app.listen(port, async () => {
-  client = await connection()
+  await connection()
   console.log('Listening on port - ', port)
 })

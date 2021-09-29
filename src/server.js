@@ -1,18 +1,18 @@
 const express = require('express')
+require('dotenv').config()
 const bodyParser = require('body-parser')
 const url = require('url')
-const { web3, account } = require('./getWeb3')
+const { web3, account } = require('./utils/getWeb3')
 const path = require('path')
 const { connection, insert, find } = require('./db')
 const { isAllowed } = require('./utils/getIsAllowed')
 const { getTokenInstance } = require('./utils/getTokenInstance')
+const { homeController } = require('./controllers/homeController')
 const {
   getOceanBalance,
   getEthBalance,
   getFaucetBalance
 } = require('./utils/getBalance')
-
-require('dotenv').config()
 
 const app = express()
 const tokenName = process.env.TOKEN_NAME ? process.env.TOKEN_NAME : 'OCEAN'
@@ -21,16 +21,7 @@ const tokenAmount = process.env.TOKEN_AMOUNT
 app.use(bodyParser.urlencoded({ extended: false }))
 
 app.get('/', async (req, res) => {
-  let balance = await getFaucetBalance(account)
-
-  res.render('index.ejs', {
-    message: null,
-    status: false,
-    balance,
-    tokenAmount,
-    tokenName,
-    account
-  })
+  homeController(res)
 })
 
 app.get('/send', async (req, res) => {

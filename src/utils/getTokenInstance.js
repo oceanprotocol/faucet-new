@@ -1,9 +1,5 @@
-const HDWalletProvider = require('@truffle/hdwallet-provider')
+const { web3 } = require('./getWeb3')
 const abi = require('../abi/token')
-const Web3 = require('web3')
-const rpc = process.env.RPC
-const provider = new HDWalletProvider(process.env.SEED_PHRASE, rpc)
-const web3 = new Web3(provider)
 
 const getTokenInstance = () => {
   try {

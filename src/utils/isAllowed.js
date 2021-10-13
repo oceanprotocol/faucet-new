@@ -11,19 +11,21 @@ const isAllowed = async (to) => {
   }
   const oceanBalance = await getOceanBalance(to)
   const EthBalance = await getEthBalance(to)
+  const EthBalanceLimit = web3.utils.toWei(process.env.TOKEN_AMOUNT, 'ether')
+  const OceanBalanceLimit = web3.utils.toWei(process.env.TOKEN_AMOUNT, 'ether')
 
   if (
     // Check Ether balance is below limit
     process.env.TOKEN_CONTRACT_ADDRESS ===
       '0x0000000000000000000000000000000000000000' &&
-    EthBalance > process.env.ETH_BALANCE_LIMIT
+    EthBalance > EthBalanceLimit
   ) {
     message = `You already have ${process.env.BASE_TOKEN_NAME} in your wallet.\nPlease come back when you require ${process.env.BASE_TOKEN_NAME}`
   } else if (
     // Check Ether balance is below limit
     process.env.TOKEN_CONTRACT_ADDRESS !==
       '0x0000000000000000000000000000000000000000' &&
-    oceanBalance > process.env.OCEAN_BALANCE_LIMIT
+    oceanBalance > OceanBalanceLimit
   ) {
     message = `You already have Ocean in your wallet.\nPlease come back when you require Ocean`
   } else {

@@ -22,6 +22,9 @@ npm start
 - TOKEN_CONTRACT_ADDRESS = token contract address (use 0x0000000000000000000000000000000000000000 to dispense ETH)
 - PORT = (optional) default: 4000
 - COOLING_PERIOD_IN_HOURS = minimum interval allowed between dispenses
+- ETH_BALANCE_LIMIT = If the requesting wallet already has more than this amount of Eth, the request will be denied. Value is in ETH.
+- OCEAN_BALANCE_LIMIT = If the requesting wallet already has more than this amount of Ocean, the request will be denied. Value is in ETH.
+- BASE_TOKEN_NAME = Name of the base token on the network.
 
 ## ✨ Code Style
 

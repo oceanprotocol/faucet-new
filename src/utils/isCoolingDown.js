@@ -1,4 +1,4 @@
-const isAllowed = (lastUpdatedOn) => {
+const isCoolingDown = (lastUpdatedOn) => {
   let currentTime = Date.now()
   let threshold = parseInt(process.env.COOLING_PERIOD_IN_HOURS) * 3600000
   console.log('currentTime - ', currentTime)
@@ -11,4 +11,4 @@ const isAllowed = (lastUpdatedOn) => {
   return false
 }
 
-module.exports = { isAllowed }
+module.exports = { isCoolingDown }

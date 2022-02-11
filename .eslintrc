@@ -4,7 +4,13 @@
     "requireConfigFile": false
   },
   "extends": ["eslint:recommended", "prettier"],
-  "env": { "es6": true, "browser": true, "node": true, "jest": true },
+  "env": {
+    "es6": true,
+    "es2020": true,
+    "browser": true,
+    "node": true,
+    "jest": true
+  },
   "ignorePatterns": ["src/public/"],
   "rules": {
     "no-empty": ["error", { "allowEmptyCatch": true }],
